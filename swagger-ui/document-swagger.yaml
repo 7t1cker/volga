@@ -1,0 +1,245 @@
+openapi: 3.0.3
+info:
+  title: Document Service API
+  version: "1.0.0"
+  description: API для управления медицинскими историями.
+
+servers:
+  - url: http://localhost:8083/api
+    description: Локальный сервер
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Используйте JWT токен для аутентификации.
+
+  schemas:
+    History:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        date:
+          type: string
+          format: date-time
+          example: "2024-05-01T09:30:00Z"
+        pacientId:
+          type: integer
+          format: int64
+          example: 101
+        hospitalId:
+          type: integer
+          format: int64
+          example: 202
+        doctorId:
+          type: integer
+          format: int64
+          example: 303
+        room:
+          type: string
+          example: "101A"
+        data:
+          type: string
+          example: "Описание медицинской истории."
+      required:
+        - date
+        - pacientId
+        - hospitalId
+        - doctorId
+        - room
+        - data
+
+    HistoryInput:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date-time
+          example: "2024-05-01T09:30:00Z"
+        pacientId:
+          type: integer
+          format: int64
+          example: 101
+        hospitalId:
+          type: integer
+          format: int64
+          example: 202
+        doctorId:
+          type: integer
+          format: int64
+          example: 303
+        room:
+          type: string
+          example: "101A"
+        data:
+          type: string
+          example: "Описание медицинской истории."
+      required:
+        - date
+        - pacientId
+        - hospitalId
+        - doctorId
+        - room
+        - data
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Unauthorized access."
+
+  responses:
+    UnauthorizedError:
+      description: Неавторизованный доступ
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+    ForbiddenError:
+      description: Доступ запрещён
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+    NotFoundError:
+      description: Ресурс не найден
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+    ValidationError:
+      description: Ошибка валидации данных
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+paths:
+  /History/Account/{id}:
+    get:
+      tags:
+        - History
+      summary: Получить историю по ID пациента
+      description: >
+        Возвращает все записи медицинской истории по ID пациента.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Список записей медицинской истории
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/History"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+      security:
+        - BearerAuth: []
+
+  /History/{id}:
+    get:
+      tags:
+        - History
+      summary: Получить историю по ID записи
+      description: >
+        Возвращает медицинскую историю по указанному ID записи.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Медицинская история
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/History"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+      security:
+        - BearerAuth: []
+
+    put:
+      tags:
+        - History
+      summary: Обновить историю по ID
+      description: >
+        Обновляет запись медицинской истории по указанному ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/HistoryInput"
+      responses:
+        "200":
+          description: История успешно обновлена
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+      security:
+        - BearerAuth: []
+
+  /History:
+    post:
+      tags:
+        - History
+      summary: Создать новую историю
+      description: >
+        Создает новую запись медицинской истории.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/HistoryInput"
+      responses:
+        "201":
+          description: История успешно создана
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+      security:
+        - BearerAuth: []

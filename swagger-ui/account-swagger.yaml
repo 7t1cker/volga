@@ -1,0 +1,382 @@
+swagger: "2.0"
+info:
+  version: "1.0.0"
+  title: Account Microservice API
+  description: Swagger документация для микросервиса учетных записей
+host: localhost:8080
+basePath: /api
+schemes:
+  - http
+tags:
+  - name: Authentication
+    description: Эндпоинты для авторизации
+  - name: Accounts
+    description: Эндпоинты для управления аккаунтами
+  - name: Doctors
+    description: Эндпоинты для работы с докторами
+paths:
+  /Authentication/SignUp:
+    post:
+      tags:
+        - Authentication
+      summary: Регистрация нового аккаунта
+      parameters:
+        - in: body
+          name: body
+          description: Данные для создания аккаунта
+          required: true
+          schema:
+            type: object
+            required:
+              - lastName
+              - firstName
+              - username
+              - password
+            properties:
+              lastName:
+                type: string
+              firstName:
+                type: string
+              username:
+                type: string
+              password:
+                type: string
+      responses:
+        201:
+          description: Аккаунт успешно создан
+        400:
+          description: Неверные данные
+
+  /Authentication/SignIn:
+    post:
+      tags:
+        - Authentication
+      summary: Вход в аккаунт
+      parameters:
+        - in: body
+          name: body
+          description: Данные для входа
+          required: true
+          schema:
+            type: object
+            required:
+              - username
+              - password
+            properties:
+              username:
+                type: string
+              password:
+                type: string
+      responses:
+        200:
+          description: Успешная авторизация
+        400:
+          description: Неверные данные
+        401:
+          description: Неавторизован
+
+  /Authentication/SignOut:
+    put:
+      tags:
+        - Authentication
+      summary: Выход из аккаунта
+      security:
+        - Bearer: []
+      responses:
+        200:
+          description: Успешный выход
+        401:
+          description: Неавторизован
+
+  /Authentication/Validate:
+    get:
+      tags:
+        - Authentication
+      summary: Проверка токена доступа
+      parameters:
+        - name: accessToken
+          in: query
+          required: true
+          type: string
+          description: Токен для проверки
+      responses:
+        200:
+          description: Результат проверки токена
+        400:
+          description: Отсутствует или неверный токен
+
+  /Authentication/Refresh:
+    post:
+      tags:
+        - Authentication
+      summary: Обновление access и refresh токенов
+      parameters:
+        - in: body
+          name: body
+          description: Refresh токен для получения новых токенов
+          required: true
+          schema:
+            type: object
+            required:
+              - refreshToken
+            properties:
+              refreshToken:
+                type: string
+      responses:
+        200:
+          description: Новые access и refresh токены
+        400:
+          description: Неверные данные
+        401:
+          description: Неавторизован
+
+  /Accounts/Me:
+    get:
+      tags:
+        - Accounts
+      summary: Получение данных текущего аккаунта
+      security:
+        - Bearer: []
+      responses:
+        200:
+          description: Данные текущего аккаунта
+        401:
+          description: Неавторизован
+        500:
+          description: Аккаунт не найден
+
+  /Accounts:
+    get:
+      tags:
+        - Accounts
+      summary: Получение списка всех аккаунтов
+      security:
+        - Bearer: []
+      parameters:
+        - name: from
+          in: query
+          type: integer
+          description: Начальная точка списка
+        - name: count
+          in: query
+          type: integer
+          description: Количество аккаунтов для получения
+      responses:
+        200:
+          description: Список аккаунтов
+        401:
+          description: Неавторизован
+        500:
+          description: Ошибка получения списка аккаунтов
+
+    post:
+      tags:
+        - Accounts
+      summary: Создание нового аккаунта
+      security:
+        - Bearer: []
+      parameters:
+        - in: body
+          name: body
+          description: Данные для создания аккаунта
+          required: true
+          schema:
+            type: object
+            required:
+              - lastName
+              - firstName
+              - username
+              - password
+              - roles
+            properties:
+              lastName:
+                type: string
+              firstName:
+                type: string
+              username:
+                type: string
+              password:
+                type: string
+              roles:
+                type: array
+                items:
+                  type: string
+      responses:
+        201:
+          description: Аккаунт успешно создан
+        400:
+          description: Неверные данные
+        401:
+          description: Неавторизован
+
+  /Accounts/{id}:
+    put:
+      tags:
+        - Accounts
+      summary: Обновление существующего аккаунта
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+        - in: body
+          name: body
+          description: Данные для обновления аккаунта
+          schema:
+            type: object
+            properties:
+              lastName:
+                type: string
+              firstName:
+                type: string
+              username:
+                type: string
+              password:
+                type: string
+              roles:
+                type: array
+                items:
+                  type: string
+      responses:
+        200:
+          description: Аккаунт успешно обновлен
+        401:
+          description: Неавторизован
+        400:
+          description: Неверные данные
+
+    delete:
+      tags:
+        - Accounts
+      summary: Удаление аккаунта по ID
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        200:
+          description: Аккаунт успешно удален
+        401:
+          description: Неавторизован
+        400:
+          description: Неверные данные
+
+  /Accounts/{id}/roles:
+    get:
+      tags:
+        - Accounts
+      summary: Получение ролей аккаунта по ID
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        200:
+          description: Роли аккаунта успешно получены
+        401:
+          description: Неавторизован
+        500:
+          description: Аккаунт не найден
+
+  /Doctors:
+    get:
+      tags:
+        - Doctors
+      summary: Получение списка всех докторов
+      security:
+        - Bearer: []
+      parameters:
+        - name: nameFilter
+          in: query
+          type: string
+          description: Фильтр по имени доктора
+        - name: from
+          in: query
+          type: integer
+          description: Начальная точка списка
+        - name: count
+          in: query
+          type: integer
+          description: Количество докторов для получения
+      responses:
+        200:
+          description: Список докторов
+        401:
+          description: Неавторизован
+        500:
+          description: Ошибка получения списка докторов
+
+    post:
+      tags:
+        - Doctors
+      summary: Создание нового доктора
+      security:
+        - Bearer: []
+      parameters:
+        - in: body
+          name: body
+          description: Данные для создания доктора
+          required: true
+          schema:
+            type: object
+            required:
+              - lastName
+              - firstName
+              - username
+              - password
+              - specializations
+            properties:
+              lastName:
+                type: string
+              firstName:
+                type: string
+              username:
+                type: string
+              password:
+                type: string
+              specializations:
+                type: array
+                items:
+                  type: string
+      responses:
+        201:
+          description: Доктор успешно создан
+        400:
+          description: Неверные данные
+        401:
+          description: Неавторизован
+
+  /Doctors/{id}:
+    get:
+      tags:
+        - Doctors
+      summary: Получение данных доктора по ID
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        200:
+          description: Данные доктора успешно получены
+        401:
+          description: Неавторизован
+        400:
+          description: Доктор не найден
+
+securityDefinitions:
+  Bearer:
+    type: apiKey
+    name: Authorization
+    in: header
+    description: "Введите 'Bearer' и затем ваш токен"

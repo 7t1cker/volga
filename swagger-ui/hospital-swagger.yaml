@@ -1,0 +1,165 @@
+swagger: "2.0"
+info:
+  version: "1.0.0"
+  title: Hospital Service API
+  description: Swagger документация для микросервиса госпиталя
+host: localhost:8081
+basePath: /api
+schemes:
+  - http
+tags:
+  - name: Hospitals
+    description: Эндпоинты для управления госпиталями
+  - name: Rooms
+    description: Эндпоинты для управления комнатами в госпиталях
+paths:
+  /Hospitals:
+    get:
+      tags:
+        - Hospitals
+      summary: Получение списка всех госпиталей
+      parameters:
+        - name: from
+          in: query
+          type: integer
+          description: Начальная точка списка
+        - name: count
+          in: query
+          type: integer
+          description: Количество госпиталей для получения
+      responses:
+        200:
+          description: Список госпиталей
+        500:
+          description: Ошибка получения списка госпиталей
+      security:
+        - Bearer: []
+    post:
+      tags:
+        - Hospitals
+      summary: Создание нового госпиталя
+      parameters:
+        - in: body
+          name: body
+          description: Данные для создания госпиталя
+          required: true
+          schema:
+            type: object
+            required:
+              - name
+              - rooms
+            properties:
+              name:
+                type: string
+              address:
+                type: string
+              contactPhone:
+                type: string
+              rooms:
+                type: array
+                items:
+                  type: string
+      responses:
+        201:
+          description: Госпиталь успешно создан
+        500:
+          description: Ошибка создания госпиталя
+      security:
+        - Bearer: []
+
+  /Hospitals/{id}:
+    get:
+      tags:
+        - Hospitals
+      summary: Получение данных госпиталя по ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+          description: ID госпиталя
+      responses:
+        200:
+          description: Данные госпиталя
+        404:
+          description: Госпиталь не найден
+      security:
+        - Bearer: []
+    put:
+      tags:
+        - Hospitals
+      summary: Обновление существующего госпиталя
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+          description: ID госпиталя
+        - in: body
+          name: body
+          description: Данные для обновления госпиталя
+          required: true
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+              address:
+                type: string
+              contactPhone:
+                type: string
+              rooms:
+                type: array
+                items:
+                  type: string
+      responses:
+        200:
+          description: Госпиталь успешно обновлён
+        404:
+          description: Госпиталь не найден
+        500:
+          description: Ошибка обновления госпиталя
+      security:
+        - Bearer: []
+    delete:
+      tags:
+        - Hospitals
+      summary: Удаление госпиталя по ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+          description: ID госпиталя
+      responses:
+        200:
+          description: Госпиталь успешно удалён
+        500:
+          description: Ошибка удаления госпиталя
+      security:
+        - Bearer: []
+
+  /Hospitals/{id}/Rooms:
+    get:
+      tags:
+        - Rooms
+      summary: Получение комнат госпиталя по ID госпиталя
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+          description: ID госпиталя
+      responses:
+        200:
+          description: Список комнат
+        500:
+          description: Ошибка получения комнат
+      security:
+        - Bearer: []
+securityDefinitions:
+  Bearer:
+    type: apiKey
+    name: Authorization
+    in: header
+    description: "Введите 'Bearer' и затем ваш токен"
